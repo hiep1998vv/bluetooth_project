@@ -20,3 +20,60 @@ def get_rssi(address):
 # Replace '00:00:00:00:00:00' with the Bluetooth device's MAC address
 device_mac_address = '00:00:00:00:00:00'
 get_rssi(device_mac_address)
+
+# hcitool with linux
+import subprocess
+
+def get_rssi(device_mac_address):
+    try:
+        output = subprocess.check_output(['hcitool', 'rssi', device_mac_address])
+        rssi = int(output.decode().split('RSSI return value: ')[1])
+        print(f"RSSI for device ({device_mac_address}): {rssi}")
+        return rssi
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
+
+device_mac_address = '00:00:00:00:00:00'  # Replace with your device's MAC address
+get_rssi(device_mac_address)
+
+
+# using pygatt 
+import pygatt
+import time
+
+def get_rssi(device_mac_address):
+    try:
+        adapter = pygatt.GATTToolBackend()
+        adapter.start()
+        device = adapter.connect(device_mac_address)
+        time.sleep(1)  # Give some time for RSSI to stabilize
+        rssi = device.get_rssi()
+        device.disconnect()
+        adapter.stop()
+        print(f"RSSI for device ({device_mac_address}): {rssi}")
+        return rssi
+    except Exception as e:
+        print(f"Error: {e}")
+
+device_mac_address = '00:00:00:00:00:00'  # Replace with your device's MAC address
+get_rssi(device_mac_address)
+
+
+# using bluepy
+from bluepy.btle import Scanner
+
+def get_rssi(device_mac_address):
+    try:
+        scanner = Scanner()
+        devices = scanner.scan(2.0)  # Scan for 2 seconds
+        for dev in devices:
+            if dev.addr == device_mac_address:
+                print(f"RSSI for device ({device_mac_address}): {dev.rssi}")
+                return dev.rssi
+        print(f"Device ({device_mac_address}) not found in scan results")
+    except Exception as e:
+        print(f"Error: {e}")
+
+device_mac_address = '00:00:00:00:00:00'  # Replace with your device's MAC address
+get_rssi(device_mac_address)
+
